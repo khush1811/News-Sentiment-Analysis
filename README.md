@@ -84,4 +84,5 @@ This project is for educational and research purposes only. It is not financial 
 
 ![Screenshot (418)](https://github.com/user-attachments/assets/02da2a03-6120-495d-8f31-528c4b3af0dc)
 
-Made by Khush N Kothawala
+Made by Khush N Kothawala 230151012 & Jaismeen Kaur 230121030
+
