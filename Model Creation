@@ -7,20 +7,15 @@ from sklearn.model_selection import train_test_split
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import LSTM, Dense
 
-# -------------------------------------------
-# 1. Load and preprocess data
-# -------------------------------------------
 df = pd.read_csv('vader_nifty_cleaned_filled.csv')
 df = df.drop(columns=['date'])
 df = df.dropna()
 df['Date'] = pd.to_datetime(df['Date'], format='%d-%m-%Y')
 df = df.sort_values('Date')
 
-# Scale both vader_score and closing price
 scaler = MinMaxScaler()
 scaled_data = scaler.fit_transform(df[['vader_score', 'NIFTY_50_Close']])
 
-# Create sequences
 def create_sequences(data, seq_len=10):
     X, y = [], []
     for i in range(len(data) - seq_len):
@@ -36,9 +31,6 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, shuffle
 scaler_price = MinMaxScaler()
 price_scaled = scaler_price.fit_transform(df[['NIFTY_50_Close']])
 
-# -------------------------------------------
-# 2. Build and train model
-# -------------------------------------------
 model = Sequential([
     LSTM(64, activation='relu', input_shape=(SEQ_LEN, 2)),
     Dense(1)
@@ -46,9 +38,6 @@ model = Sequential([
 model.compile(optimizer='adam', loss='mse')
 model.fit(X_train, y_train, epochs=30, batch_size=16, validation_data=(X_test, y_test))
 
-# -------------------------------------------
-# 3. Function: predict from user input news
-# -------------------------------------------
 def predict_nifty_from_news(news_text, recent_df):
     analyzer = SentimentIntensityAnalyzer()
     vader_score_today = analyzer.polarity_scores(news_text)['compound']
@@ -64,9 +53,6 @@ def predict_nifty_from_news(news_text, recent_df):
     predicted_price = scaler_price.inverse_transform(pred_scaled)[0][0]
     return predicted_price
 
-# -------------------------------------------
-# 4. Predict with user input
-# -------------------------------------------
 if __name__ == '__main__':
     user_news = input("\n📰 Enter today's news: ")
     recent_data = df[['vader_score', 'NIFTY_50_Close']].iloc[-9:].copy()
@@ -76,12 +62,10 @@ import pickle
 
 model.save("model.h5")
 
-# Save scalers
 with open("scaler.pkl", "wb") as f:
     pickle.dump(scaler_price, f)
 
 with open("full_scaler.pkl", "wb") as f:
     pickle.dump(scaler, f)
 
-# Save latest data
 df[['vader_score', 'NIFTY_50_Close']].iloc[-9:].to_csv("data.csv", index=False)
